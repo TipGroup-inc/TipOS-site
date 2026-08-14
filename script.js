@@ -2,29 +2,49 @@ const header = document.querySelector('[data-header]');
 const progress = document.querySelector('.scroll-progress span');
 const toggle = document.querySelector('.menu-toggle');
 const nav = document.querySelector('.site-nav');
+const menuBackdrop = document.querySelector('.menu-backdrop');
 const navLinks = [...document.querySelectorAll('.site-nav a')];
 const sections = [...document.querySelectorAll('main section[id]')];
 
+let scrollScheduled = false;
+
 function updateScroll() {
   const max = document.documentElement.scrollHeight - window.innerHeight;
-  const percent = max > 0 ? (window.scrollY / max) * 100 : 0;
+  const progressValue = max > 0 ? window.scrollY / max : 0;
   header?.classList.toggle('scrolled', window.scrollY > 30);
-  progress?.style.setProperty('--scroll', `${percent}%`);
+  progress?.style.setProperty('--scroll', String(progressValue));
+  scrollScheduled = false;
+}
+
+function scheduleScrollUpdate() {
+  if (scrollScheduled) return;
+  scrollScheduled = true;
+  window.requestAnimationFrame(updateScroll);
+}
+
+function setMenu(open) {
+  toggle?.classList.toggle('open', open);
+  toggle?.setAttribute('aria-expanded', String(open));
+  nav?.classList.toggle('open', open);
+  menuBackdrop?.classList.toggle('visible', open);
+  menuBackdrop?.setAttribute('aria-hidden', String(!open));
+  menuBackdrop?.toggleAttribute('tabindex', !open);
+  document.body.classList.toggle('menu-open', open);
 }
 
 function closeMenu() {
-  toggle?.classList.remove('open');
-  toggle?.setAttribute('aria-expanded', 'false');
-  nav?.classList.remove('open');
+  setMenu(false);
 }
 
 toggle?.addEventListener('click', () => {
-  const isOpen = toggle.classList.toggle('open');
-  toggle.setAttribute('aria-expanded', String(isOpen));
-  nav?.classList.toggle('open', isOpen);
+  setMenu(!nav?.classList.contains('open'));
 });
 
+menuBackdrop?.addEventListener('click', closeMenu);
 navLinks.forEach((link) => link.addEventListener('click', closeMenu));
+window.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') closeMenu();
+});
 
 if ('IntersectionObserver' in window) {
   const revealObserver = new IntersectionObserver((entries, observer) => {
@@ -50,35 +70,9 @@ if ('IntersectionObserver' in window) {
   document.querySelectorAll('.reveal').forEach((element) => element.classList.add('visible'));
 }
 
-window.addEventListener('scroll', updateScroll, { passive: true });
-window.addEventListener('resize', updateScroll);
+window.addEventListener('scroll', scheduleScrollUpdate, { passive: true });
+window.addEventListener('resize', scheduleScrollUpdate);
 updateScroll();
-
-if (window.matchMedia('(pointer: fine)').matches) {
-  window.addEventListener('pointermove', (event) => {
-    document.documentElement.style.setProperty('--mouse-x', `${event.clientX}px`);
-    document.documentElement.style.setProperty('--mouse-y', `${event.clientY}px`);
-  });
-
-  document.querySelectorAll('.magnetic').forEach((button) => {
-    button.addEventListener('pointermove', (event) => {
-      const box = button.getBoundingClientRect();
-      const x = (event.clientX - box.left - box.width / 2) * 0.12;
-      const y = (event.clientY - box.top - box.height / 2) * 0.12;
-      button.style.transform = `translate(${x}px, ${y}px)`;
-    });
-    button.addEventListener('pointerleave', () => { button.style.transform = ''; });
-  });
-
-  const terminal = document.querySelector('[data-tilt]');
-  terminal?.addEventListener('pointermove', (event) => {
-    const box = terminal.getBoundingClientRect();
-    const rotateY = ((event.clientX - box.left) / box.width - 0.5) * 4;
-    const rotateX = ((event.clientY - box.top) / box.height - 0.5) * -4;
-    terminal.style.transform = `rotate(0deg) rotateY(${rotateY}deg) rotateX(${rotateX}deg) translateY(-8px)`;
-  });
-  terminal?.addEventListener('pointerleave', () => { terminal.style.transform = ''; });
-}
 
 const startedAt = Date.now();
 function updateUptime() {
