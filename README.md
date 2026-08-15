@@ -9,6 +9,14 @@ Site de divulgação e apresentação do **TipOS** — sistema operacional próp
 - Documentar como buildar/rodar em QEMU
 - Roadmap público e como contribuir
 
+## Decisões da S1
+
+A primeira versão usa **HTML, CSS e JavaScript puro**, porque o site precisa abrir com um servidor estático simples e permitir que o time evolua a identidade visual sem depender de uma etapa de build. A landing page reúne as áreas de sobre, camadas do sistema, features, roadmap, primeiros passos e contato em uma navegação por âncoras responsiva.
+
+A identidade visual parte de um fundo azul-marinho quase preto, acentos coral, ciano e lime, títulos em Space Grotesk e detalhes técnicos em DM Mono. As animações são implementadas com CSS e JavaScript nativos, com suporte a `prefers-reduced-motion`.
+
+O detalhamento de escopo, mapa de seções, navegação, wireframes textuais e critérios de qualidade está em [docs/PLANEJAMENTO-S1.md](docs/PLANEJAMENTO-S1.md).
+
 ## Seções planeadas
 
 - **Sobre** — o que é o TipOS e a história do projeto
